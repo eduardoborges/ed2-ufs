@@ -48,7 +48,25 @@ public class OrganizadorSimples implements IFileOrganizer{
 
 	@Override
 	public Aluno delAluno(long matric) {
-		// TODO Auto-generated method stub
+		try {
+			this.canal.position(0);
+			long size = this.canal.size();
+			while(this.canal.position() < size){
+				ByteBuffer buf  = ByteBuffer.allocate(Aluno.TAM);
+				this.canal.read(buf);
+				if( matric  == buf.getLong(0)){
+					long pos = this.canal.position() - Aluno.TAM;
+					ByteBuffer bufLost = ByteBuffer.allocate(Aluno.TAM);
+					this.canal.read(bufLost, this.canal.size() - Aluno.TAM);
+					this.canal.write(bufLost, pos);
+					this.canal.truncate(this.canal.size() - Aluno.TAM);
+					buf.position(0);
+					return Conversor.getAluno(buf);
+				}
+			}
+		} catch (Exception e) {
+			//TODO: handle exception
+		}
 		return null;
 	}
 	
