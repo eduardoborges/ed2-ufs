@@ -23,6 +23,8 @@ class Aluno {
 		this.curso 		= curso;
 	}
 
+	public static final int TAM = 200;
+
 	// gets
 	public long getMatric(){
 		return this.matric;

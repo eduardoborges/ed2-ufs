@@ -1,5 +1,3 @@
-package ProjetoED2;
-
 import java.io.FileNotFoundException;
 
 public class TesteOrganizadorSimples {
