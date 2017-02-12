@@ -133,7 +133,13 @@ class OrganizadorSequencial implements IFileOrganizer {
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Realoca umitem Aluno para outra posicao do arquivo
+	 * @param source Posição do dado origem
+	 * @param target Posição destino
+	 * @return void
+	*/
 	public void realocateItem(int source, int target){
 		try {
 			Aluno alunoSource = this.getItemIndex(source);
