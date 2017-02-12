@@ -5,12 +5,12 @@ public class TesteOrganizadorSequencial {
 	public static void main(String[] args) {
 		try{
 
-			Aluno a = new Aluno(1, "Maelsu", "Rua 15", "aloha7@mail.com", (short) 22);
-			Aluno b = new Aluno(2, "Eduardo", "Rua 10", "aloha5@mail.com", (short) 22);
-			Aluno c = new Aluno(4, "Tonho", "Rua 31", "aloha75@mail.com", (short) 22);
-			Aluno d = new Aluno(6, "Luandson", "Rua 11", "aloha5@mail.com", (short) 22);
-			Aluno e = new Aluno(9, "Laisa", "Rua 49", "laisa@email.com", (short)14);
-			Aluno f = new Aluno(3, "Raul", "Rua 11", "laisa@email.com", (short)14);
+			Aluno a = new Aluno(78, "Maelsu", "Rua 15", "aloha7@mail.com", (short) 22);
+			Aluno b = new Aluno(16, "Eduardo", "Rua 10", "aloha5@mail.com", (short) 22);
+			Aluno c = new Aluno(89, "Tonho", "Rua 31", "aloha75@mail.com", (short) 22);
+			Aluno d = new Aluno(1, "Luandson", "Rua 11", "aloha5@mail.com", (short) 22);
+			Aluno e = new Aluno(0, "Laisa", "Rua 49", "laisa@email.com", (short)14);
+			Aluno f = new Aluno(15, "Raul", "Rua 11", "laisa@email.com", (short)14);
 
 
 
@@ -22,13 +22,11 @@ public class TesteOrganizadorSequencial {
 			
 			OrganizadorSequencial organizadorSequencial = new OrganizadorSequencial("alunos.db");
 			
-			
-			organizadorSequencial.addAluno(c);
-			
-			organizadorSequencial.addAluno(e);
-			organizadorSequencial.addAluno(d);
-			organizadorSequencial.addAluno(a);
+			organizadorSequencial.addAluno(a);			
 			organizadorSequencial.addAluno(b);
+			organizadorSequencial.addAluno(c);
+			organizadorSequencial.addAluno(d);
+			organizadorSequencial.addAluno(e);
 			organizadorSequencial.addAluno(f);
 
 			// // teste de get getPosition

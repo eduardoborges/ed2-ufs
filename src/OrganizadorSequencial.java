@@ -1,11 +1,9 @@
 
-import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.util.function.Function;
 import java.nio.ByteBuffer;
 
 
@@ -24,35 +22,41 @@ class OrganizadorSequencial implements IFileOrganizer {
 		try {
 			long positionToInsert = this.canal.size() / Aluno.TAM;
 			int itens = (int) (long) (this.canal.size() / Aluno.TAM);
-			System.out.println("> Temos " + itens + " itens");
+
+			// System.out.println("> Temos " + itens + " itens");
+			// System.out.println(">>> Vamo inserir " + alunoToInsert.getNome() + " com matricula " + alunoToInsert.getMatric());
 
 			if(itens != 0){
-				System.out.println(">> Entrou no if");
 				for (int i = 1; i <= itens; i++) {
 					Aluno currAluno = this.getItemIndex(i);
-					System.out.println(">>> Verificando aluno no index " + i + " com matricula " + currAluno.getMatric());
 					
-					if (alunoToInsert.getMatric() > currAluno.getMatric()) {
-						System.out.println(">>> Aluno atual possui matricula menor, setando ponto de inserção: " + i);
+					if (alunoToInsert.getMatric() < currAluno.getMatric()) {
+						// System.out.println(">>> " + alunoToInsert.getNome() +" ("+ alunoToInsert.getMatric() +") > "+ currAluno.getNome() +" (" + currAluno.getMatric() +"): " + i);
 						positionToInsert = i;
 						break;
+					} else {
+						positionToInsert = i+1;
 					}
 				}
 
-				System.out.println("> realocar voltando");
-				while (itens > positionToInsert) {
-					System.out.println(">> realocando o item " + itens + " na posicao " + (itens+1) );
+				// System.out.println("> OK, posicao de insercao é: " + positionToInsert);
+				// System.out.println("> realocar voltando");
+				 
+				while (itens >= positionToInsert) {
+					// System.out.println(">> realocando o item " + itens + " na posicao " + (itens+1) );
 					this.realocateItem(itens, itens + 1);
 					itens--;
 				}
 			}
 
-			System.out.println("> Gravando " + alunoToInsert.getNome() + " na posicao " + positionToInsert);
-			System.out.println("FIM, PROXIMO ITEM");
 			// finalmente gravo
-			long positionToInsertInBytes = positionToInsert * Aluno.TAM;
+			if(positionToInsert <= 0) positionToInsert = 1;
+			long positionToInsertInBytes = ((positionToInsert - 1) * Aluno.TAM);
+			// System.out.println("Posicao em bytes para inserir: "+ positionToInsertInBytes);
 			ByteBuffer buf = Conversor.getBuffer(alunoToInsert);
 			this.canal.write(buf,positionToInsertInBytes);
+			// // System.out.println("> Gravando " + alunoToInsert.getNome() + " na posicao " + positionToInsert);
+			// System.out.println("FIM, PROXIMO ITEM");
 
 		} catch (IOException e) {
 			e.printStackTrace();
