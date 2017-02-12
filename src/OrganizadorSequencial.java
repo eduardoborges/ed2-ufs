@@ -1,9 +1,11 @@
 
+import java.awt.print.Paper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.nio.ByteBuffer;
 
 
@@ -17,6 +19,12 @@ class OrganizadorSequencial implements IFileOrganizer {
 		this.canal = raf.getChannel();
 	}
 	
+	/**
+	 * Adiciona um Aluno no arquivo
+	 * 
+	 * @param alunoToInsert		Objeto com o aluno a ser inserido
+	 * @return void
+	 **/
 	@Override
 	public void addAluno(Aluno alunoToInsert) {
 		try {
@@ -26,15 +34,17 @@ class OrganizadorSequencial implements IFileOrganizer {
 			// System.out.println("> Temos " + itens + " itens");
 			// System.out.println(">>> Vamo inserir " + alunoToInsert.getNome() + " com matricula " + alunoToInsert.getMatric());
 
+
 			if(itens != 0){
 				for (int i = 1; i <= itens; i++) {
 					Aluno currAluno = this.getItemIndex(i);
 					
-					if (alunoToInsert.getMatric() < currAluno.getMatric()) {
+					if (alunoToInsert.getMatric() < currAluno.getMatric() ) {
 						// System.out.println(">>> " + alunoToInsert.getNome() +" ("+ alunoToInsert.getMatric() +") < "+ currAluno.getNome() +" (" + currAluno.getMatric() +"): " + i);
 						positionToInsert = i;
 						break;
-					} else {
+					} 
+					else {
 						positionToInsert = i+1;
 					}
 				}
@@ -53,10 +63,7 @@ class OrganizadorSequencial implements IFileOrganizer {
 			// finalmente gravo
 			if(positionToInsert <= 0) positionToInsert = 1;
 
-			long positionToInsertInBytes = ((positionToInsert - 1) * Aluno.TAM);
-			// System.out.println("Posicao em bytes para inserir: "+ positionToInsertInBytes);
-			ByteBuffer buf = Conversor.getBuffer(alunoToInsert);
-			this.canal.write(buf,positionToInsertInBytes);
+			this.writeAluno(alunoToInsert, positionToInsert);
 			// System.out.println("> Gravando " + alunoToInsert.getNome() + " na posicao " + positionToInsert);
 			// System.out.println("FIM, PROXIMO ITEM");
 
@@ -84,10 +91,41 @@ class OrganizadorSequencial implements IFileOrganizer {
 		return null;
 	}
 
+	/**
+	 * Remove um aluno do arquivo passando sua matricula
+	 * 
+	 * @param 	matric	Matricula do aluno a ser removido
+	 * @return 	aluno	Um objeto com o al	uno adicionado
+	 **/
 	@Override
 	public Aluno delAluno(long matric) {
-		// TODO Auto-generated method stub
-		return null;
+		int realocPoint = 0;
+		try {
+			long size = this.canal.size();
+			int itens = (int) size / Aluno.TAM;
+			Aluno blankAluno = new Aluno(-1, "[VAZIO]", "[VAZIO]", "[VAZIO]", (short) 0);
+
+			for (int i = 1; i <= itens; i++) {
+				Aluno currAluno = this.getItemIndex(i);
+				if (matric == currAluno.getMatric()) {
+					this.writeAluno(blankAluno, i);
+					realocPoint = i;
+					// break;
+				}
+			}
+			
+			while (realocPoint <= itens) {
+				this.realocateItem(realocPoint+1, realocPoint);
+				realocPoint++;
+			}
+
+			long truncateOn = size - Aluno.TAM;
+			this.canal.truncate(truncateOn);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return  null;
 	}
 	
 	/**
@@ -96,6 +134,17 @@ class OrganizadorSequencial implements IFileOrganizer {
 	 * @param matric 	Matricula do aluno buscado
 	 * @return			Retorna um inteiro com a posição daquele aluno
 	 */
+
+	private void writeAluno(Aluno aluno, long positionToInsert) {
+		try {
+			long positionToInsertInBytes = ((positionToInsert - 1) * Aluno.TAM);
+			ByteBuffer buf = Conversor.getBuffer(aluno);
+			this.canal.write(buf, positionToInsertInBytes);
+		} catch (Exception e) {
+			System.out.println("Erro ao gravar aluno: "+ e.getMessage());
+		}
+	}
+
 	public int getPosition(long matric){
 		int i = 0;
 		try {
@@ -121,7 +170,7 @@ class OrganizadorSequencial implements IFileOrganizer {
 	 * 
 	 * @param index 	Posição do item desejado
 	 * @return 			Retorna o objeto do aluno buscado
-	 */
+	 **/
 	public Aluno getItemIndex(int index){
 		try {
 			long posicaoBytes = (index-1) * Aluno.TAM;
@@ -149,6 +198,7 @@ class OrganizadorSequencial implements IFileOrganizer {
 			ByteBuffer buf = Conversor.getBuffer(alunoSource);
 			int positionToInsert = (target-1) * Aluno.TAM;
 			this.canal.write(buf, positionToInsert);
+			
 		} catch (Exception e) {
 			System.out.println("Ocorreu um erro ao realocar Aluno: " + e.getMessage());
 		}

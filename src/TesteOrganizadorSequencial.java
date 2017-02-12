@@ -14,7 +14,7 @@ public class TesteOrganizadorSequencial {
 
 
 
-			OrganizadorSimples organizadorSimples = new OrganizadorSimples("alunos.db");
+			// OrganizadorSimples organizadorSimples = new OrganizadorSimples("alunos.db");
 			// organizadorSimples.addAluno(a);
 			// organizadorSimples.addAluno(b);
 			// organizadorSimples.addAluno(c);
@@ -45,6 +45,17 @@ public class TesteOrganizadorSequencial {
 			
 			// Aluno alunoItem5 = organizador.getItemIndex(2);
 			// System.out.println(alunoItem5.getNome());
+			organizadorSequencial.showAllData();
+
+			
+			organizadorSequencial.delAluno(15);
+			organizadorSequencial.delAluno(0);
+
+			organizadorSequencial.showAllData();
+
+			Aluno g = new Aluno(14, "Pablo", "Rua 11", "laisa@email.com", (short) 14);
+
+			organizadorSequencial.addAluno(g);
 
 			organizadorSequencial.showAllData();
 			
