@@ -1,3 +1,10 @@
+/**
+ * @author  Eduardo Borges
+ * @about   Estudante de Sistemas de Informação - UFS
+ * @website http://github.com/eduardoborges
+ * @version 1.0
+ */
+
 
 /**
  *   posicoes
