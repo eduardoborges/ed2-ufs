@@ -55,14 +55,12 @@ public class TesteOrganizadorSequencial {
 			// System.out.println(alunoItem5.getNome());
 			organizadorSequencial.showAllData();
 
-			
 			organizadorSequencial.delAluno(15);
 			organizadorSequencial.delAluno(0);
 
 			organizadorSequencial.showAllData();
 
 			Aluno g = new Aluno(14, "Pablo", "Rua 11", "laisa@email.com", (short) 14);
-
 			organizadorSequencial.addAluno(g);
 
 			organizadorSequencial.showAllData();

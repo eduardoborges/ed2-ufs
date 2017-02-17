@@ -36,50 +36,46 @@ class OrganizadorSequencial implements IFileOrganizer {
 	@Override
 	public void addAluno(Aluno alunoToInsert) {
 		try {
-			long positionToInsert = this.canal.size() / Aluno.TAM;
-			int itens = (int) (long) (this.canal.size() / Aluno.TAM);
-
-			// System.out.println("> Temos " + itens + " itens");
-			// System.out.println(">>> Vamo inserir " + alunoToInsert.getNome() + " com matricula " + alunoToInsert.getMatric());
-
+			long positionToInsert 	= this.canal.size() / Aluno.TAM;
+			int itens 				= (int) (long) (this.canal.size() / Aluno.TAM);
 
 			if(itens != 0){
 				for (int i = 1; i <= itens; i++) {
 					Aluno currAluno = this.getItemIndex(i);
 					
 					if (alunoToInsert.getMatric() < currAluno.getMatric() ) {
-						// System.out.println(">>> " + alunoToInsert.getNome() +" ("+ alunoToInsert.getMatric() +") < "+ currAluno.getNome() +" (" + currAluno.getMatric() +"): " + i);
 						positionToInsert = i;
 						break;
 					} 
 					else {
-						positionToInsert = i+1;
+						positionToInsert = i + 1;
 					}
 				}
 
-				// System.out.println("> OK, posicao de insercao é: " + positionToInsert);
-				// System.out.println("> realocar voltando");
-				
 				int tamanho = itens;
 				while (positionToInsert <= tamanho) {
-					// System.out.println(">> realocando o item " + itens + " na posicao " + (tamanho+1) );
 					this.realocateItem(tamanho, tamanho+1);
 					tamanho--;
 				}
+			} else {
+				positionToInsert = 1;
 			}
 
-			// finalmente gravo
-			if(positionToInsert <= 0) positionToInsert = 1;
-
 			this.writeAluno(alunoToInsert, positionToInsert);
-			// System.out.println("> Gravando " + alunoToInsert.getNome() + " na posicao " + positionToInsert);
-			// System.out.println("FIM, PROXIMO ITEM");
+
+			
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Busca um aluno do arquivo passando sua matricula
+	 * 
+	 * @param 	matric	Matricula do aluno a ser buscado
+	 * @return 	aluno	Um objeto Aluno com o aluno encontrado, caso contrario retorna null
+	 **/
 	@Override
 	public Aluno getAluno(long matric) {
 		try {
@@ -137,12 +133,11 @@ class OrganizadorSequencial implements IFileOrganizer {
 	}
 	
 	/**
-	 * Retorna a posicao do aluno pela matricula.
+	 * Grava um aluno no banco
 	 * 
-	 * @param matric 	Matricula do aluno buscado
-	 * @return			Retorna um inteiro com a posição daquele aluno
+	 * @param 	aluno 				Objeto do tipo Aluno a ser inserido
+	 * @return	positionToInsert 	Posicao do banco que será inserido o registro
 	 */
-
 	private void writeAluno(Aluno aluno, long positionToInsert) {
 		try {
 			long positionToInsertInBytes = ((positionToInsert - 1) * Aluno.TAM);
@@ -153,7 +148,13 @@ class OrganizadorSequencial implements IFileOrganizer {
 		}
 	}
 
-	public int getPosition(long matric){
+	/**
+	 * Retorna a posicao do aluno de uma determinada matricula
+	 * 
+	 * @param 	matric 	Matricula do aluno
+	 * @return 	Aluno	Retorna o objeto Aluno
+	 **/
+	private int getPosition(long matric){
 		int i = 0;
 		try {
 			this.canal.position(0);
@@ -179,7 +180,7 @@ class OrganizadorSequencial implements IFileOrganizer {
 	 * @param index 	Posição do item desejado
 	 * @return 			Retorna o objeto do aluno buscado
 	 **/
-	public Aluno getItemIndex(int index){
+	private Aluno getItemIndex(int index){
 		try {
 			long posicaoBytes = (index-1) * Aluno.TAM;
 			this.canal.position(posicaoBytes);
@@ -200,7 +201,7 @@ class OrganizadorSequencial implements IFileOrganizer {
 	 * @param target Posição destino
 	 * @return void
 	*/
-	public void realocateItem(int source, int target){
+	private void realocateItem(int source, int target){
 		try {
 			Aluno alunoSource = this.getItemIndex(source);
 			ByteBuffer buf = Conversor.getBuffer(alunoSource);
@@ -214,7 +215,7 @@ class OrganizadorSequencial implements IFileOrganizer {
 
 
 	/**
-	 * Printa o estado atual dos dados
+	 * Printa o estado atual dos dados do arquivo
 	 */
 	public void showAllData() {
 		System.out.println("\n\n===== Estado dos Dados =======\n");
