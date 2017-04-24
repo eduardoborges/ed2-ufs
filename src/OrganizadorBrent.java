@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel;
 
 class OrganizadorBrent implements IFileOrganizer {
     
-    private final int SIZE = 12000017;
+    private final int SIZE = 25;
 
     // Canal de comunicacao com o arquivo
     private FileChannel canal;
@@ -306,11 +306,10 @@ class OrganizadorBrent implements IFileOrganizer {
                 ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
 				this.canal.read(buf);
 				Aluno a = Conversor.getAluno(buf);
-                String output = "-----------------------------------------\n";
+                String output = "";
                 output += "| "+i+" |";
 				output += a.getMatric() + " | ";
-				output += a.getNome() + "\n";
-                output += "-----------------------------------------\n";
+				output += a.getNome();
                 System.out.println(output);
 
             }

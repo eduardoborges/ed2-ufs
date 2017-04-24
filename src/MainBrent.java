@@ -1,6 +1,4 @@
-
 import java.io.*;
-
 
 public class MainBrent {
 
@@ -17,7 +15,7 @@ public class MainBrent {
 
         String arquivo = "brentDatabase.db";
         OrganizadorBrent database = new OrganizadorBrent(arquivo);
-        // database.initDatabase();
+        database.initDatabase();
         database.addAluno(a);
         database.addAluno(b);
         database.addAluno(c);
@@ -26,17 +24,10 @@ public class MainBrent {
         database.addAluno(f);
         database.showAllData();
         
+        Aluno del = database.delAluno(15);
+
         
-        // Aluno testeA = database.getAluno(29);
-        // if (testeA != null) System.out.println(testeA.getMatric() + " | " + 
-        //         testeA.getNome().substring(0,15) + " | " +
-        //         testeA.getEmail());
-        
-        // Aluno del = database.delAluno(27);
-        // if (del != null)
-        //     System.out.println("O aluno " + del.getNome() + " (" + del.getMatric() + ") foi removido.");
-        
-        // database.showAllData();
+        database.showAllData();
 
     }
     
