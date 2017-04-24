@@ -1,5 +1,4 @@
 *.class
-bin/*.class
 *.ctxt
 .mtj.tmp/
 *.jar
@@ -7,3 +6,5 @@ bin/*.class
 *.ear
 hs_err_pid*
 *.db
+**/**/.*class
+src/*.class
