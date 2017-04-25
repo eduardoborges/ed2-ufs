@@ -7,7 +7,7 @@ public class TestePeformace {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
-        int q = 10000;
+        int q = 1000;
         try{
             OrganizadorBrent        brentDatabase           = new OrganizadorBrent("brentDatabase.db");
             OrganizadorSequencial   organizadorSequencial   = new OrganizadorSequencial("sequentialDatabase.db");
