@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel;
 
 class OrganizadorBrent implements IFileOrganizer {
     
-    private final int SIZE = 25;
+    private final int SIZE = 10000;
 
     // Canal de comunicacao com o arquivo
     private FileChannel canal;
@@ -133,7 +133,7 @@ class OrganizadorBrent implements IFileOrganizer {
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
-        System.out.println("Aluno adicionado!");
+        // System.out.println("Aluno adicionado!");
     }
 
     /**
@@ -244,10 +244,12 @@ class OrganizadorBrent implements IFileOrganizer {
     public void initDatabase() {        
         try {
             canal.position(0);
+            System.out.println("Pre-alocando a base de dados com "+ this.SIZE+" registros...");
             for (int i = 0; i < this.SIZE; i++){
                 Aluno blankAluno = new Aluno(-1, "[VAZIO]", "[VAZIO]", "[VAZIO]", (short) 0);
                 canal.write(Conversor.getBuffer(blankAluno));
             }
+            System.out.println("Base pronta! \n");
         } catch (IOException e) {
             e.printStackTrace();
         }
