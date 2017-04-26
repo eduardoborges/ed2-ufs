@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel;
 
 class OrganizadorBrent implements IFileOrganizer {
     
-    private final int SIZE = 9276328;
+    private final int SIZE = 12000017;
 
     // Canal de comunicacao com o arquivo
     private FileChannel canal;

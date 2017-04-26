@@ -16,7 +16,6 @@ public class TestePeformace {
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
         int Q = 1000;
-        long toSearch = 101215;
 
         try {
 
@@ -34,7 +33,7 @@ public class TestePeformace {
 
             // vamos preparar algumas coisas...
             // databases necessarias
-            OrganizadorBrent        brentDatabase = new OrganizadorBrent("enem_brent.db");
+            OrganizadorBrent        brentDatabase = new OrganizadorBrent("enem_brent_full.db");
             OrganizadorSequencial   seqDatabase   = new OrganizadorSequencial("enem_seq.db");
             
             // formatar os horarios bonitinho
@@ -43,41 +42,6 @@ public class TestePeformace {
 
 
             /// VAMOS AOS TESTES
-
-
-            System.out.println("\n\n==> TESTE COM METODO SEQUENCIAL <== ");
-            Date startsAt2 = new Date();
-            System.out.println("Inicio dos testes: " + formatTime.format(startsAt2));
-            
-            // teste de procurar um aluno so antes.
-            Aluno b = seqDatabase.getAluno(toSearch);
-            System.out.println(b.getEmail());
-
-            // try {
-            //     for (int i = 0; i < Q; i++){
-            //         ByteBuffer buf = ByteBuffer.allocate(8);
-            //         canal.read(buf);
-            //         long toSearch = buf.getLong(0);
-
-            //         // System.out.println(buf.getLong(0));
-
-            //         Aluno b = seqDatabase.getAluno(toSearch);
-            //         System.out.println(b.getEmail());
-
-            //     }
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-		    // }
-
-            Date endsAt2 = new Date();
-            long totalTime2 = endsAt2.getTime() - startsAt2.getTime();
-            System.out.println("===============================");
-            System.out.println("Iniciado em:     " + formatTime.format(startsAt2));
-            System.out.println("Finalizado em:   " + formatTime.format(endsAt2));
-            System.out.println();
-            System.out.println("Tempo gasto:     " + totalTime2 + " ms");
-
-
             // ===============================================================
             // ===============================================================
 
@@ -87,26 +51,9 @@ public class TestePeformace {
             Date startsAt = new Date();
             System.out.println("Inicio dos testes: " + formatTime.format(startsAt));
 
-            // teste pra procurar um aluno, por enquanto
-            Aluno a = brentDatabase.getAluno(toSearch);
-            System.out.println(a.getEmail());
-
-		    // try {
-            //     for (int i = 0; i < Q; i++){
-            //         ByteBuffer buf = ByteBuffer.allocate(8);
-            //         mcanal.read(buf);
-            //         long toSearch = buf.getLong(0);
-
-            //         // System.out.println(buf.getLong(0));
-            //         // Aluno b = brentDatabase.getAluno(toSearch);
-            //         // System.out.println(b.getEmail());
-
-            //     }
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-		    // }
-
-
+            for (long matricula : alunos){
+                brentDatabase.getAluno(matricula);
+            }
 
             Date endsAt = new Date();
             long totalTime = endsAt.getTime() - startsAt.getTime();
@@ -118,6 +65,24 @@ public class TestePeformace {
 
             // ===============================================================
             // ===============================================================
+
+            System.out.println("\n\n==> TESTE COM METODO SEQUENCIAL <== ");
+            Date startsAt2 = new Date();
+            System.out.println("Inicio dos testes: " + formatTime.format(startsAt2));
+
+            for (long matricula : alunos){
+                seqDatabase.getAluno(matricula);
+            }
+
+
+            Date endsAt2 = new Date();
+            long totalTime2 = endsAt2.getTime() - startsAt2.getTime();
+            System.out.println("===============================");
+            System.out.println("Iniciado em:     " + formatTime.format(startsAt2));
+            System.out.println("Finalizado em:   " + formatTime.format(endsAt2));
+            System.out.println();
+            System.out.println("Tempo gasto:     " + totalTime2 + " ms");
+
 
             
         
