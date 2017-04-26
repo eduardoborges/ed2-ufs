@@ -1,0 +1,14 @@
+Esta tarefa consiste em comparar o desempenho de acesso entre o método de organização sequencial (implementado na terefa do Organizador Sequencial) e o método de Brent implementado na terefa anterior. Para isso, deve ser usado um arquivo com 1000 matrículas chamado selected.db (fornecido pelo professor). Essas 1000 matrículas foram coletadas alteatoriamente a partir do arquivo enem_aleat.db descrito na tarefa anterior. Como cada matrícula possui 8 bytes (tipo long em java), o tamanho total desse arquivo é de exatamente 8000 bytes (= 8x1000).  Nesta análise, deve-se:
+
+A. Calcular o tempo total que o método sequencial leva para acessar os 1000 alunos indicados. O arquivo com os dados de todos os 9.276.328  alunos já organizados sequencialmente é chamado de enem_seq.db e é fornecido pelo professor. É a partir deste aquivo que o método sequencial deve acessar cada um dos 1000 alunos.
+
+B. Calcular o tempo total que o método de Brent leva para acessar os mesmos 1000 alunos indicados. O arquivo a partir do qual essas 1000 consultas serão realizadas é o enem_brent.db depois do processo de migração especificado acima.
+
+C. Criar um relatório com uma tabela comparativa que mostre o tempo total dispendido por cada método para localizar os 1000 registros indicados. Discutir no relatório o porquê dos resultados que forma obtidos.
+
+
+EU SOU IDIOTA PRA KRL 
+KKKKKK
+
+
+NE NAO
