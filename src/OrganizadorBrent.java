@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel;
 
 class OrganizadorBrent implements IFileOrganizer {
     
-    private final int SIZE = 12000017;
+    private final int SIZE = 11;
 
     // Canal de comunicacao com o arquivo
     private FileChannel canal;
@@ -31,7 +31,7 @@ class OrganizadorBrent implements IFileOrganizer {
 	 * @return hash         Posicao hash a ser inserido
 	 **/
     private int calcHash(long matricula) {
-        return (int)(matricula % this.SIZE);
+        return (int)matricula % this.SIZE;
     }
     
     /**
@@ -41,7 +41,8 @@ class OrganizadorBrent implements IFileOrganizer {
 	 * @return increment    O incremento da posicao do aluno
      **/
     private int calcIncrement(long matricula) {
-        return (int)(matricula % (this.SIZE - 2)) + 1;
+        // return (int)(matricula % (this.SIZE - 2)) + 1;
+        return (int)(matricula / 11) % (this.SIZE);
     }
     
     /**
@@ -53,6 +54,7 @@ class OrganizadorBrent implements IFileOrganizer {
     @Override
     public void addAluno(Aluno a) {
         ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
+
         
         long matric     = a.getMatric();
         int hash        = calcHash(matric);
@@ -61,6 +63,9 @@ class OrganizadorBrent implements IFileOrganizer {
         int posicao3    = posicao;
         int x, z;
 
+        System.out.println("Posicao a inserir: "+hash);
+        
+
         try {
             canal.position(posicao);
             canal.read(buf);
@@ -68,72 +73,77 @@ class OrganizadorBrent implements IFileOrganizer {
             x = (int)buf.getLong();
             z = x;
             buf.clear();
+
+            System.out.println( "X: " + x);
             
             // Se a posicao estiver livre DEUS AJUDE QUE SIM AMÉM?
             if (x == 0 || x == -1) {
-                canal.position(posicao);
-                canal.write(Conversor.getBuffer(a));
+                System.out.println("ta livre, insere "+ a.getNome() + "na posicao em bytes "+ posicao);
+                this.canal.position(posicao);
+                this.canal.read(buf);
+                System.out.println(buf.getLong());
+                this.canal.write(Conversor.getBuffer(a));
                 buf.clear();
             }
 
             // Houve uma colisao
-            else {
-                // add sem mover o primeiro
-                int colisao = x;
-                int incremento = calcIncrement(matric);
-                int passos = 1;
-                while(x != 0 && x != -1) {
-                    passos++;
-                    posicao = (((posicao/Aluno.TAM) + incremento) % this.SIZE) * Aluno.TAM;
-                    canal.position(posicao);
-                    canal.read(buf);
-                    buf.flip();
-                    x = (int)(buf.getLong());
-                    buf.clear();
-                }
+            // else {
+            //     // add sem mover o primeiro
+            //     int colisao = x;
+            //     int incremento = calcIncrement(matric);
+            //     int passos = 1;
+            //     while(x != 0 && x != -1) {
+            //         passos++;
+            //         posicao = (((posicao/Aluno.TAM) + incremento) % this.SIZE) * Aluno.TAM;
+            //         canal.position(posicao);
+            //         canal.read(buf);
+            //         buf.flip();
+            //         x = (int)(buf.getLong());
+            //         buf.clear();
+            //     }
                 
-                // add movendo o primeiro
-                int incremento2 = calcIncrement(colisao);
-                int passos2 = 1;
-                while(z != 0 && z != -1) {
-                    passos2++;
-                    posicao2 = (((posicao2/Aluno.TAM) + incremento2) % this.SIZE) * Aluno.TAM;
-                    canal.position(posicao2);
-                    canal.read(buf);
-                    buf.flip();
-                    z = (int)(buf.getLong());
-                    buf.clear();
-                }
+            //     // add movendo o primeiro
+            //     int incremento2 = calcIncrement(colisao);
+            //     int passos2 = 1;
+            //     while(z != 0 && z != -1) {
+            //         passos2++;
+            //         posicao2 = (((posicao2/Aluno.TAM) + incremento2) % this.SIZE) * Aluno.TAM;
+            //         canal.position(posicao2);
+            //         canal.read(buf);
+            //         buf.flip();
+            //         z = (int)(buf.getLong());
+            //         buf.clear();
+            //     }
                 
-                // AQUI TEMOS DUAS OPCOES
-                // 1 - apenas escrever ou
-                // 2 - colocar em outro no inicio e mover o que está lá
+            //     // AQUI TEMOS DUAS OPCOES
+            //     // 1 - apenas escrever ou
+            //     // 2 - colocar em outro no inicio e mover o que está lá
 
 
-                // 1
-                if ( (searchCost(colisao)+passos) <= (searchCost(colisao)+passos2) ) {
-                    canal.position(posicao);
-                    canal.write(Conversor.getBuffer(a));
-                    buf.clear();
-                }
-                // 2
-                else {
-                    canal.position(posicao3);
-                    canal.read(buf);
-                    buf.clear();
-                    canal.position(posicao2);
-                    canal.write(buf);
-                    buf.clear();
-                    canal.position(posicao3);
-                    canal.write(Conversor.getBuffer(a));
-                    buf.clear();
-                }
-            }
+            //     // 1
+            //     if ( (searchCost(colisao)+passos) <= (searchCost(colisao)+passos2) ) {
+            //         canal.position(posicao);
+            //         canal.write(Conversor.getBuffer(a));
+            //         buf.clear();
+            //     }
+            //     // 2
+            //     else {
+            //         canal.position(posicao3);
+            //         canal.read(buf);
+            //         buf.clear();
+            //         canal.position(posicao2);
+            //         canal.write(buf);
+            //         buf.clear();
+            //         canal.position(posicao3);
+            //         canal.write(Conversor.getBuffer(a));
+            //         buf.clear();
+            //     }
+            // }
 
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
-        // System.out.println("Aluno adicionado!");
+        System.out.println("Aluno " + a.getNome() +" adicionado!");
     }
 
     /**
@@ -241,13 +251,13 @@ class OrganizadorBrent implements IFileOrganizer {
      * 
      * @return void
      */
-    public void initDatabase() {        
+    public void initDatabase() {
+        System.out.println("Pre-alocando a base de dados com "+ this.SIZE+" registros...");    
         try {
-            canal.position(0);
-            System.out.println("Pre-alocando a base de dados com "+ this.SIZE+" registros...");
+            this.canal.position(0);
             for (int i = 0; i < this.SIZE; i++){
                 Aluno blankAluno = new Aluno(-1, "[VAZIO]", "[VAZIO]", "[VAZIO]", (short) 0);
-                canal.write(Conversor.getBuffer(blankAluno));
+                canal.write(Conversor.getBuffer(blankAluno), i*200 );
             }
             System.out.println("Base pronta! \n");
         } catch (IOException e) {
@@ -304,14 +314,15 @@ class OrganizadorBrent implements IFileOrganizer {
 		System.out.println("\n\n= ESTADO DA BASE DE DADOS =======\n");
 		try {
             for (int i = 0; i < this.SIZE; i++){
-                
                 ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
 				this.canal.read(buf);
 				Aluno a = Conversor.getAluno(buf);
                 String output = "";
                 output += "| "+i+" |";
 				output += a.getMatric() + " | ";
-				output += a.getNome();
+				output += a.getNome() + " | ";
+				output += a.getEmail() + " | ";
+                output += a.getEndereco();
                 System.out.println(output);
 
             }
