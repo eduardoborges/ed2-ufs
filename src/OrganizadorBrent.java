@@ -12,13 +12,12 @@ import java.nio.channels.FileChannel;
 
 class OrganizadorBrent implements IFileOrganizer {
     
-    private final int SIZE = 12000017;
+    private final int SIZE = 11;
 
     // Canal de comunicacao com o arquivo
     private FileChannel canal;
     
     public OrganizadorBrent(String fileName) throws FileNotFoundException{
-
         File file = new File(fileName);
 		RandomAccessFile raf = new RandomAccessFile(file, "rw");
 		this.canal = raf.getChannel();
@@ -41,7 +40,7 @@ class OrganizadorBrent implements IFileOrganizer {
 	 * @return increment    O incremento da posicao do aluno
      **/
     private int calcIncrement(long matricula) {
-        return (int)(matricula % (this.SIZE - 2)) + 1;
+        return (int)( (matricula / this.SIZE) % (this.SIZE));
     }
     
     /**
@@ -52,87 +51,79 @@ class OrganizadorBrent implements IFileOrganizer {
 	 **/
     @Override
     public void addAluno(Aluno a) {
-        ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
         
-        long matric     = a.getMatric();
-        int hash        = calcHash(matric);
-        int posicao     = hash * Aluno.TAM;
-        int posicao2    = posicao;
-        int posicao3    = posicao;
-        int x, z;
+        long matric       = a.getMatric();
+        int position      = calcHash(matric);
 
-        try {
-            canal.position(posicao);
-            canal.read(buf);
-            buf.flip();
-            x = (int)buf.getLong();
-            z = x;
-            buf.clear();
+        // preciso de algumas copias da posicao original
+        int position2 = position;
+        int originalPosition= position;
+
+        Aluno quemTaAqui = getItemIndex(position);
+        int x = (int)quemTaAqui.getMatric();
+        int z = x;
             
-            // Se a posicao estiver livre DEUS AJUDE QUE SIM AMÉM?
-            if (x == 0 || x == -1) {
-                canal.position(posicao);
-                canal.write(Conversor.getBuffer(a));
-                buf.clear();
-            }
-
-            // Houve uma colisao
-            else {
-                // add sem mover o primeiro
-                int colisao = x;
-                int incremento = calcIncrement(matric);
-                int passos = 1;
-                while(x != 0 && x != -1) {
-                    passos++;
-                    posicao = (((posicao/Aluno.TAM) + incremento) % this.SIZE) * Aluno.TAM;
-                    canal.position(posicao);
-                    canal.read(buf);
-                    buf.flip();
-                    x = (int)(buf.getLong());
-                    buf.clear();
-                }
-                
-                // add movendo o primeiro
-                int incremento2 = calcIncrement(colisao);
-                int passos2 = 1;
-                while(z != 0 && z != -1) {
-                    passos2++;
-                    posicao2 = (((posicao2/Aluno.TAM) + incremento2) % this.SIZE) * Aluno.TAM;
-                    canal.position(posicao2);
-                    canal.read(buf);
-                    buf.flip();
-                    z = (int)(buf.getLong());
-                    buf.clear();
-                }
-                
-                // AQUI TEMOS DUAS OPCOES
-                // 1 - apenas escrever ou
-                // 2 - colocar em outro no inicio e mover o que está lá
-
-
-                // 1
-                if ( (searchCost(colisao)+passos) <= (searchCost(colisao)+passos2) ) {
-                    canal.position(posicao);
-                    canal.write(Conversor.getBuffer(a));
-                    buf.clear();
-                }
-                // 2
-                else {
-                    canal.position(posicao3);
-                    canal.read(buf);
-                    buf.clear();
-                    canal.position(posicao2);
-                    canal.write(buf);
-                    buf.clear();
-                    canal.position(posicao3);
-                    canal.write(Conversor.getBuffer(a));
-                    buf.clear();
-                }
-            }
-
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
+        // Se a posicao estiver livre DEUS AJUDE QUE SIM AMÉM?
+        if (x == 0 || x == -1) {
+            // System.out.println("entrou no if, adicionou na pos "+ hashPosition);
+            this.writeAluno(a, position);
         }
+
+        // Houve uma colisao
+        else
+        {
+            // add sem mover o primeiro
+            int colisao = x;
+            Aluno contandoAluno;
+
+            int incremento = calcIncrement(matric);            
+            int passos = 1;
+            while(x != 0 && x != -1) {
+                passos++;
+                position = (position + incremento) % this.SIZE;
+                contandoAluno = this.getItemIndex(position);
+                x = (int)contandoAluno.getMatric();
+            }
+            
+            // add movendo o primeiro
+            int incremento2 = calcIncrement(colisao);
+            int passos2 = 1;
+            while(z != 0 && z != -1) {
+                passos2++;
+                position2 = (position2 + incremento2) % this.SIZE;                
+                contandoAluno = this.getItemIndex(position2);
+                z = (int)contandoAluno.getMatric();
+            }
+            
+            // AQUI TEMOS DUAS OPCOES
+            // 1 - apenas escrever
+            // 2 - colocar em outro no inicio e mover o que está lá
+
+
+            // Esta se calculando apenas a colisao do primeiro item a ser inserido  
+            // e necessario se calcular o incremento do item que esta armazenado la dentro do vetor
+
+            // 1
+            if ( (searchCost(colisao)+passos) <= (searchCost(colisao)+passos2) ) {
+                this.writeAluno(a, position);
+            }
+            // 2
+            else {
+
+                System.out.println("entrou na condicao 2");
+                System.out.println("posicao original: " + originalPosition);
+                System.out.println("posicao original: " + position2);
+
+                Aluno tmpAluno = this.getItemIndex(originalPosition);
+
+                this.writeAluno(tmpAluno, position2);
+                this.writeAluno(a, originalPosition);
+
+
+
+            }
+        }
+
         System.out.println("Aluno adicionado!");
     }
 
@@ -246,7 +237,7 @@ class OrganizadorBrent implements IFileOrganizer {
             canal.position(0);
             for (int i = 0; i < this.SIZE; i++){
                 Aluno blankAluno = new Aluno(-1, "[VAZIO]", "[VAZIO]", "[VAZIO]", (short) 0);
-                canal.write(Conversor.getBuffer(blankAluno));
+                canal.write(Conversor.getBuffer(blankAluno), i * Aluno.TAM);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -299,23 +290,93 @@ class OrganizadorBrent implements IFileOrganizer {
      * @return void
 	 */
     public void showAllData() {
-		System.out.println("\n\n= ESTADO DA BASE DE DADOS =======\n");
+		System.out.println("\n\n= ESTADO DA BASE DE DADOS ==\n");
 		try {
+            this.canal.position(0);            
+            
             for (int i = 0; i < this.SIZE; i++){
                 
-                ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
-				this.canal.read(buf);
-				Aluno a = Conversor.getAluno(buf);
+                Aluno a = this.getItemIndex(i);
                 String output = "-----------------------------------------\n";
                 output += "| "+i+" |";
 				output += a.getMatric() + " | ";
 				output += a.getNome() + "\n";
                 output += "-----------------------------------------\n";
                 System.out.println(output);
-
+                this.canal.position(0);
             }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
+    /**
+	 * Grava um aluno no banco
+	 * 
+	 * @param 	aluno 				Objeto do tipo Aluno a ser inserido
+	 * @return	positionToInsert 	Posicao do banco que será inserido o registro
+	 */
+	private void writeAluno(Aluno aluno, long positionToInsert) {
+		try {
+			long positionToInsertInBytes = ((positionToInsert-1)  * Aluno.TAM);
+			ByteBuffer buf = Conversor.getBuffer(aluno);
+			this.canal.write(buf, positionToInsertInBytes);
+            this.canal.position(0);            
+		} catch (Exception e) {
+			System.out.println("Erro ao gravar aluno: "+ e.getMessage());
+		}
+	}
+
+    /**
+	 * Retorna a posicao do aluno de uma determinada matricula
+	 * 
+	 * @param 	matric 	Matricula do aluno
+	 * @return 	Aluno	Retorna o objeto Aluno
+	 **/
+	private int getPosition(long matric){
+		int i = 0;
+		try {
+			this.canal.position(0);
+			long size = this.canal.size();
+			while( canal.position() < size){
+				i++;
+				ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
+				this.canal.read(buf);
+				if(matric == buf.getLong(0)){
+					buf.position(0);
+					return i;
+				}
+			}
+            this.canal.position(0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return i;
+	}
+	
+	/**
+	 * Retorna o item no banco de dados na posicao passada.
+	 * 
+	 * @param index 	Posição do item desejado
+	 * @return 			Retorna o objeto do aluno buscado
+	 **/
+	private Aluno getItemIndex(int index){
+		try {
+            long posicaoInBytes = 0;
+            if (index != 0){
+			    posicaoInBytes = (index-1) * Aluno.TAM;
+            }
+			this.canal.position(posicaoInBytes);
+			ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
+			this.canal.read(buf);
+            this.canal.position(0);
+            buf.clear();            
+			return Conversor.getAluno(buf);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 }
