@@ -33,6 +33,10 @@ public class MainBrent {
         // if (testeA != null) System.out.println(testeA.getMatric() + " | " + 
         //         testeA.getNome().substring(0,15) + " | " +
         //         testeA.getEmail());
+
+        database.delAluno(27);
+
+        database.showAllData();
         
         // Aluno del = database.delAluno(27);
         // if (del != null)

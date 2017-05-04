@@ -57,7 +57,7 @@ class OrganizadorBrent implements IFileOrganizer {
 
         // preciso de algumas copias da posicao original
         int position2 = position;
-        int originalPosition= position;
+        int originalPosition = position;
 
         Aluno quemTaAqui = getItemIndex(position);
         int x = (int)quemTaAqui.getMatric();
@@ -110,9 +110,9 @@ class OrganizadorBrent implements IFileOrganizer {
             // 2
             else {
 
-                System.out.println("entrou na condicao 2");
-                System.out.println("posicao original: " + originalPosition);
-                System.out.println("posicao original: " + position2);
+                // System.out.println("entrou na condicao 2");
+                // System.out.println("posicao original: " + originalPosition);
+                // System.out.println("posicao original: " + position2);
 
                 Aluno tmpAluno = this.getItemIndex(originalPosition);
 
@@ -152,7 +152,7 @@ class OrganizadorBrent implements IFileOrganizer {
             }
             else {
                 int incremento = this.calcIncrement(matric);
-                while(x != 0 || x != -1) {
+                while(x != 0) {
                     posicao = (((posicao/Aluno.TAM) + incremento) % this.SIZE) * Aluno.TAM;
                     canal.position(posicao);
                     canal.read(buf);
@@ -236,7 +236,7 @@ class OrganizadorBrent implements IFileOrganizer {
         try {
             canal.position(0);
             for (int i = 0; i < this.SIZE; i++){
-                Aluno blankAluno = new Aluno(-1, "[VAZIO]", "[VAZIO]", "[VAZIO]", (short) 0);
+                Aluno blankAluno = new Aluno(0, "[VAZIO]", "[VAZIO]", "[VAZIO]", (short) 0);
                 canal.write(Conversor.getBuffer(blankAluno), i * Aluno.TAM);
             }
         } catch (IOException e) {
@@ -298,13 +298,13 @@ class OrganizadorBrent implements IFileOrganizer {
                 
                 Aluno a = this.getItemIndex(i);
                 String output = "-----------------------------------------\n";
-                output += "| "+i+" |";
+                output += "| "+i+" | ";
 				output += a.getMatric() + " | ";
-				output += a.getNome() + "\n";
-                output += "-----------------------------------------\n";
+				output += a.getNome();
                 System.out.println(output);
                 this.canal.position(0);
             }
+            System.out.println("-----------------------------------------");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -318,40 +318,17 @@ class OrganizadorBrent implements IFileOrganizer {
 	 */
 	private void writeAluno(Aluno aluno, long positionToInsert) {
 		try {
-			long positionToInsertInBytes = ((positionToInsert-1)  * Aluno.TAM);
+            long positionToInsertInBytes = 0;
+            if(positionToInsert != 0 ){
+                positionToInsertInBytes = (positionToInsert  * Aluno.TAM);
+            }
+			
 			ByteBuffer buf = Conversor.getBuffer(aluno);
 			this.canal.write(buf, positionToInsertInBytes);
             this.canal.position(0);            
 		} catch (Exception e) {
 			System.out.println("Erro ao gravar aluno: "+ e.getMessage());
 		}
-	}
-
-    /**
-	 * Retorna a posicao do aluno de uma determinada matricula
-	 * 
-	 * @param 	matric 	Matricula do aluno
-	 * @return 	Aluno	Retorna o objeto Aluno
-	 **/
-	private int getPosition(long matric){
-		int i = 0;
-		try {
-			this.canal.position(0);
-			long size = this.canal.size();
-			while( canal.position() < size){
-				i++;
-				ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
-				this.canal.read(buf);
-				if(matric == buf.getLong(0)){
-					buf.position(0);
-					return i;
-				}
-			}
-            this.canal.position(0);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return i;
 	}
 	
 	/**
@@ -364,7 +341,7 @@ class OrganizadorBrent implements IFileOrganizer {
 		try {
             long posicaoInBytes = 0;
             if (index != 0){
-			    posicaoInBytes = (index-1) * Aluno.TAM;
+			    posicaoInBytes = index * Aluno.TAM;
             }
 			this.canal.position(posicaoInBytes);
 			ByteBuffer buf = ByteBuffer.allocate(Aluno.TAM);
